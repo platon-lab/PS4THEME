@@ -1,0 +1,38 @@
+name: Build PS4 theme
+
+on:
+  push:
+    paths:
+      - "video.mp4"
+      - "build_theme.sh"
+      - ".github/workflows/build-theme.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Build theme files
+        run: bash build_theme.sh video.mp4
+
+      # Если у тебя есть свой инструмент упаковки в репозитории,
+      # задай его путь в переменной репозитория PKG_TOOL
+      # (Settings → Secrets and variables → Actions → Variables).
+      - name: Pack PKG (optional)
+        if: ${{ vars.PKG_TOOL != '' }}
+        run: ${{ vars.PKG_TOOL }} theme_build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ps4-theme
+          path: |
+            theme_build/**
+            *.pkg
+          if-no-files-found: warn
