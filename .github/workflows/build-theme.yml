@@ -5,6 +5,7 @@ on:
     paths:
       - "video.mp4"
       - "build_theme.sh"
+      - "background.raf.zip"
       - ".github/workflows/build-theme.yml"
   workflow_dispatch:
 
@@ -15,15 +16,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install ffmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg unzip
 
       - name: Build theme files
         run: bash build_theme.sh video.mp4
 
-      # Если у тебя есть свой инструмент упаковки в репозитории,
-      # задай его путь в переменной репозитория PKG_TOOL
-      # (Settings → Secrets and variables → Actions → Variables).
+      - name: Unpack animated background
+        run: |
+          mkdir -p theme_build/scene
+          unzip -o background.raf.zip -d theme_build/
+
       - name: Pack PKG (optional)
         if: ${{ vars.PKG_TOOL != '' }}
         run: ${{ vars.PKG_TOOL }} theme_build
